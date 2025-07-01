@@ -33,6 +33,9 @@ export default defineNuxtConfig({
     caseSensitive: false,
     listQueryLimit: 500,
     disableBotAccessLog: false,
+    // CORS configuration
+    corsEnabled: true,
+    corsOrigins: '*', // Comma-separated list of allowed origins, or '*' for all
     public: {
       previewMode: '',
       slugDefaultLength: '6',

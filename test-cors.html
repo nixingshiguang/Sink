@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test for Sink API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sink API CORS Test</h1>
+    <p>This page tests CORS functionality for the Sink short link API.</p>
+    
+    <form id="linkForm">
+        <div class="form-group">
+            <label for="apiUrl">API URL:</label>
+            <input type="url" id="apiUrl" value="http://localhost:3000/api/link/create" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="token">Authorization Token:</label>
+            <input type="text" id="token" value="SinkCool" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="url">URL to Shorten:</label>
+            <input type="url" id="url" value="https://github.com/ccbikai/Sink" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="slug">Custom Slug (optional):</label>
+            <input type="text" id="slug" placeholder="my-custom-slug">
+        </div>
+        
+        <button type="submit">Create Short Link</button>
+    </form>
+    
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('linkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const apiUrl = document.getElementById('apiUrl').value;
+            const token = document.getElementById('token').value;
+            const url = document.getElementById('url').value;
+            const slug = document.getElementById('slug').value;
+            const resultDiv = document.getElementById('result');
+            
+            const payload = { url };
+            if (slug) {
+                payload.slug = slug;
+            }
+            
+            try {
+                resultDiv.innerHTML = 'Making request...';
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.text();
+                let parsedData;
+                try {
+                    parsedData = JSON.parse(data);
+                } catch {
+                    parsedData = data;
+                }
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `Success! Status: ${response.status}\n\nResponse:\n${JSON.stringify(parsedData, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `Error! Status: ${response.status}\n\nResponse:\n${JSON.stringify(parsedData, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `Network Error:\n${error.message}\n\nThis might indicate a CORS issue if the request was blocked.`;
+            }
+        });
+    </script>
+</body>
+</html>
